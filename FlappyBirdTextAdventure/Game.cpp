@@ -162,6 +162,25 @@ char Game::PrintPlayer(int w, int h)
 	}
 }
 
+char Game::PrintObstacles(int w, int h)
+{
+	// For each obstacle
+	for (int i = 0; i < obstacleList.size(); i++)
+	{
+		// Check cell by cell
+		if (w == obstacleList[i]->GetPositionX())
+		{
+			if (STAGE_HEIGHT - h <= obstacleList[i]->GetHeight())
+			{
+				return obstacleList[i]->GetShape();
+				break;
+			}
+		}
+	}
+
+	return NULL;
+}
+
 // Print the game area
 void Game::PrintStage()
 {
@@ -179,13 +198,17 @@ void Game::PrintStage()
 		{
 			char charToPrint = ' ';
 
+			// Draw the obstacles
+			if (PrintObstacles(w, h) != NULL)
+			{
+				charToPrint = PrintObstacles(w, h);
+			}
+
 			// Draw the player
 			if (PrintPlayer(w, h) != NULL)
 			{
 				charToPrint = PrintPlayer(w, h);
 			}
-
-			// Draw the obstacles
 
 			std::cout << charToPrint;
 		}

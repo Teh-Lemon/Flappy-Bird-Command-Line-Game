@@ -3,8 +3,8 @@
 
 Obstacle::Obstacle(void)
 {
-	height = 1;
-	width = 1;
+	height = 5;
+	width = 5;
 	shape = '|';
 	positionX = 5;
 }
