@@ -2,9 +2,12 @@
 #include "Player.h"
 
 // Constants
-const int STAGE_HEIGHT = 12;
 const int STAGE_WIDTH = 30;
+const int STAGE_HEIGHT = 12;
 const int PLAYER_X_POSITION = 3;
+const int INTERVAL_OBSTACLES = 8;
+const int START_PERIOD = 5;
+int timeCounter = 0;
 
 #pragma region Initialization
 // Constructor
@@ -17,8 +20,6 @@ Game::Game(void)
 	gameOver = false;
 	quitGame = false;
 	restarting = false;
-
-	GenerateObstacle();
 
 	LoadVerbFile("verbs.txt");
 }
@@ -167,14 +168,9 @@ char Game::PrintObstacles(int w, int h)
 	// For each obstacle
 	for (int i = 0; i < obstacleList.size(); i++)
 	{
-		// Check cell by cell
-		if (w == obstacleList[i]->GetPositionX())
+		if (IntersectWithObstacle(obstacleList[i], w, h))
 		{
-			if (STAGE_HEIGHT - h <= obstacleList[i]->GetHeight())
-			{
-				return obstacleList[i]->GetShape();
-				break;
-			}
+			return obstacleList[i]->GetShape();
 		}
 	}
 
@@ -197,7 +193,7 @@ void Game::PrintStage()
 		for (int w = 0; w < STAGE_WIDTH; w++)
 		{
 			char charToPrint = ' ';
-
+			
 			// Draw the obstacles
 			if (PrintObstacles(w, h) != NULL)
 			{
@@ -295,7 +291,74 @@ void Game::ApplyStageBoundaries()
 
 void Game::GenerateObstacle()
 {
-	obstacleList.push_back(new Obstacle());
+	// Every time interval
+	if (timeCounter % INTERVAL_OBSTACLES == 0)
+	{
+		// Create a new obstacle at the end of the screen
+		obstacleList.push_back(new Obstacle(0, STAGE_WIDTH));
+
+		// Randomize its height.
+		// At least a height of 1
+		// Below the top of the stage
+		int height = (rand() % (STAGE_HEIGHT - obstacleList[0]->GetGapSize())) + 1;
+		obstacleList.back()->SetHeight(height);
+	}
+}
+
+void Game::RemoveObstacle(int i)
+{
+	delete obstacleList[i];
+	obstacleList.erase(obstacleList.begin() + i);
+}
+
+bool Game::IntersectWithObstacle(Obstacle* obstacle, int x, int y)
+{
+		// Check x position are the same
+		if (x == obstacle->GetPositionX())
+		{
+			// Check top half
+			if (STAGE_HEIGHT - y > 
+				obstacle->GetHeight() + obstacle->GetGapSize()) 
+			{
+				return true;
+			}
+			// Check bottom half
+			else if (STAGE_HEIGHT - y <= obstacle->GetHeight())
+			{
+				return true;
+			}
+		}
+
+		// Return false if no matches
+		return false;
+}
+
+void Game::CheckCollisions()
+{
+	// For each obstacle
+	for (int i = 0; i < obstacleList.size(); i++)
+	{
+		// Increase score when player passes an obstacle
+		if (PLAYER_X_POSITION == obstacleList[i]->GetPositionX())
+		{
+			score++;
+		}
+
+		// Remove obstacle when they go off the stage
+		if (obstacleList[i]->GetPositionX() < 0)
+		{
+			RemoveObstacle(i);
+		}
+
+		// Check for intersection with obstacle by player
+		// Set game over if true
+		if (IntersectWithObstacle(obstacleList[i], PLAYER_X_POSITION, player->GetPositionY()))
+		{
+			score = 0;
+			gameOver = true;
+		}
+
+	}
 }
 #pragma endregion
 
@@ -348,10 +411,34 @@ void Game::ParseInput(std::string input)
 
 void Game::Update(std::string input)
 {
+	if (timeCounter > START_PERIOD)
+	{
+		// Generate a steady stream of obstacles
+		GenerateObstacle();
+	}
+
+	// Read in user text input
 	ParseInput(input);
 
+	// Update objects
+	for (int i = 0; i < obstacleList.size(); i++)
+	{
+		obstacleList[i]->Update();
+	}
+
+	// Update player
 	player->Update();
 
+	// Keep the player within the stage
 	ApplyStageBoundaries();
+
+	// Check for collisions
+	// Increase score for passing obstacles
+	// Remove old obstacles
+	// Check for collision between obstacle and player
+	CheckCollisions();
+	
+	// Increase the clock
+	timeCounter++;
 }
 #pragma endregion

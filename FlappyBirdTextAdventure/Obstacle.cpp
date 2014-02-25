@@ -1,12 +1,13 @@
 #include "Obstacle.h"
 
+const int GAP_SIZE = 3;
 
-Obstacle::Obstacle(void)
+Obstacle::Obstacle(int setHeight, int spawnPos)
+	: height(setHeight), positionX(spawnPos)
 {
-	height = 5;
-	width = 5;
+	width = 1;
 	shape = '|';
-	positionX = 5;
+	velocityX = -1;
 }
 
 
@@ -19,6 +20,11 @@ int Obstacle::GetHeight()
 {
 	return height;
 }
+void Obstacle::SetHeight(int newHeight)
+{
+	height = newHeight;
+}
+
 int Obstacle::GetWidth()
 {
 	return width;
@@ -30,4 +36,14 @@ int Obstacle::GetPositionX()
 char Obstacle::GetShape()
 {
 	return shape;
+}
+
+int Obstacle::GetGapSize()
+{
+	return GAP_SIZE;
+}
+
+void Obstacle::Update()
+{
+	positionX += velocityX;
 }

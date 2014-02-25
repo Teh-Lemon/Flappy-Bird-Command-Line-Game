@@ -7,7 +7,6 @@
 
 #include "Game.h";
 
-
 void InitializeGame();
 Game* game;
 

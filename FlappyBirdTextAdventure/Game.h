@@ -54,6 +54,11 @@ private:
 
 	// Generate the obstacles
 	void GenerateObstacle();
+	void RemoveObstacle(int);
+
+	// Check collisions
+	bool IntersectWithObstacle(Obstacle*, int, int);
+	void CheckCollisions();
 
 	// Read in the available commands
 	void LoadVerbFile(std::string filePath);
