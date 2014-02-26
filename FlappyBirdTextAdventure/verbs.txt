@@ -1,4 +1,0 @@
-0,FLAP,false
-0,F,false
-1,RESTART,false
-2,QUIT,false

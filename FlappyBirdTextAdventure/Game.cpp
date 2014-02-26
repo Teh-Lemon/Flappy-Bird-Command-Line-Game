@@ -7,6 +7,10 @@ const int STAGE_HEIGHT = 12;
 const int PLAYER_X_POSITION = 3;
 const int INTERVAL_OBSTACLES = 8;
 const int START_PERIOD = 5;
+const std::string DATA_FILE_PATH = "Data/data.dat";
+const std::string VERBS_FILE_PATH = "Data/verbs.txt";
+
+// Game time
 int timeCounter = 0;
 
 #pragma region Initialization
@@ -20,14 +24,93 @@ Game::Game(void)
 	gameOver = false;
 	quitGame = false;
 	restarting = false;
+	state = PLAYING;
 
-	LoadVerbFile("verbs.txt");
+	LoadVerbFile(VERBS_FILE_PATH);
+	ReadSavedData(DATA_FILE_PATH);
 }
 
 // Destructor
 Game::~Game(void)
 {
 	delete player;
+}
+
+void Game::ReadSavedData(std::string filePath)
+{	
+	//	File to read in
+	std::ifstream txtFile (filePath);
+	//	Each line of text file
+	std::string line;
+	//	First field
+	std::string field;
+	//	Second field
+	std::string value;
+
+	//	Open the file and read in the saved data
+	if (txtFile.is_open())
+	{
+		//	When file is ready to be read
+		while (txtFile.good())
+		{
+			field = "";
+			value = "";
+
+			//	Read in a line
+			std::getline (txtFile, line);
+
+			//	Split the line by comma
+			for (int i = 0; i < line.size(); ++i)
+			{
+				//	Second and third field
+				if (line[i] == '=')
+				{
+					for (int j = i + 1; j < line.size(); ++j)
+					{
+						//	Second field
+						value.push_back(line[j]);
+					}	
+					break;
+				}
+				//	First field
+				else
+				{
+					field.push_back(line[i]);					
+				}
+			}
+
+			LoadSavedData(field, value);
+		}
+
+		txtFile.close();
+	}
+}
+
+void Game::LoadSavedData(std::string field, std::string value)
+{
+	// TODO: Rewrite this so it's not a giant if/else chain
+	// RESEARCH: Map lookups with boost
+
+	if (field == "highscore")
+	{
+		highScore = atoi(value.c_str());
+	}
+}
+
+void Game::SaveSavedData(std::string filePath)
+{
+	//	File to read in
+	std::ofstream txtFile (filePath);
+
+	//Save the high score
+	//	Open the file and read in the saved data
+	if (txtFile.is_open())
+	{
+		txtFile.clear();
+		txtFile << "highscore=" << highScore;
+
+		txtFile.close();
+	}
 }
 
 //	Load in the valid commands from the text files
@@ -339,7 +422,7 @@ void Game::CheckCollisions()
 	for (int i = 0; i < obstacleList.size(); i++)
 	{
 		// Increase score when player passes an obstacle
-		if (PLAYER_X_POSITION == obstacleList[i]->GetPositionX())
+		if (PLAYER_X_POSITION == obstacleList[i]->GetPositionX() + 1)
 		{
 			score++;
 		}
@@ -354,8 +437,15 @@ void Game::CheckCollisions()
 		// Set game over if true
 		if (IntersectWithObstacle(obstacleList[i], PLAYER_X_POSITION, player->GetPositionY()))
 		{
-			score = 0;
-			gameOver = true;
+			player->SetPlayerShape('x');
+
+			if (score > highScore)
+			{
+				highScore = score;
+				SaveSavedData(DATA_FILE_PATH);
+			}
+
+			state = GAME_OVER;
 		}
 
 	}
@@ -411,34 +501,47 @@ void Game::ParseInput(std::string input)
 
 void Game::Update(std::string input)
 {
-	if (timeCounter > START_PERIOD)
-	{
-		// Generate a steady stream of obstacles
-		GenerateObstacle();
-	}
-
 	// Read in user text input
 	ParseInput(input);
 
-	// Update objects
-	for (int i = 0; i < obstacleList.size(); i++)
+	switch (state)
 	{
-		obstacleList[i]->Update();
+	case PLAYING:
+		if (timeCounter > START_PERIOD)
+		{
+			// Generate a steady stream of obstacles
+			GenerateObstacle();
+		}
+
+		// Update objects
+		for (int i = 0; i < obstacleList.size(); i++)
+		{
+			obstacleList[i]->Update();
+		}
+
+		// Update player
+		player->Update();
+
+		// Keep the player within the stage
+		ApplyStageBoundaries();
+
+		// Check for collisions
+		// Increase score for passing obstacles
+		// Remove old obstacles
+		// Check for collision between obstacle and player
+		CheckCollisions();
+
+		// Increase the clock
+		timeCounter++;
+		break;
+
+	case GAME_OVER:
+		validInput = "GAME OVER. YOUR HIGH SCORE IS "
+			+ std::to_string(static_cast<long long>(highScore)) + "\n" 
+			+ "[RESTART, QUIT]";
+		break;
 	}
-
-	// Update player
-	player->Update();
-
-	// Keep the player within the stage
-	ApplyStageBoundaries();
-
-	// Check for collisions
-	// Increase score for passing obstacles
-	// Remove old obstacles
-	// Check for collision between obstacle and player
-	CheckCollisions();
 	
-	// Increase the clock
-	timeCounter++;
+
 }
 #pragma endregion

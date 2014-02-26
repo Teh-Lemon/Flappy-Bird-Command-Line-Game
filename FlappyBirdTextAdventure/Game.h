@@ -32,7 +32,11 @@ private:
 	bool quitGame;
 	// Whether to restart the game
 	bool restarting;
+	// States
+	enum { PLAYING, GAME_OVER };
+	int state;
 
+	// Draw methods
 	// Print the game title at the top of the window
 	void PrintGameName();
 	// Print the player score
@@ -48,22 +52,27 @@ private:
 	char PrintPlayer(int, int);
 	// Print the obstacles
 	char PrintObstacles(int, int);
-	
-	// Keep the player within the stage
-	void ApplyStageBoundaries();
 
 	// Generate the obstacles
 	void GenerateObstacle();
 	void RemoveObstacle(int);
 
+	// Collision methods
 	// Check collisions
 	bool IntersectWithObstacle(Obstacle*, int, int);
 	void CheckCollisions();
+	// Keep the player within the stage
+	void ApplyStageBoundaries();
 
 	// Read in the available commands
 	void LoadVerbFile(std::string filePath);
 	// Handle text input
 	void VerbRoutine(int);
+	// Load the high score from file
+	void ReadSavedData(std::string);
+	void LoadSavedData(std::string, std::string);
+	// Save new high score
+	void SaveSavedData(std::string);
 
 public:
 	Game(void);

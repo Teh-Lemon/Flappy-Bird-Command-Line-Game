@@ -4,16 +4,18 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "Game.h";
 
 void InitializeGame();
 Game* game;
+// States
 
 int main()
 {
 	// While the game is still running
-	bool gameFinished = false;
+	bool gameRunning = true;
 	std::string userInput = "";
 
 	// Initialize the game
@@ -36,14 +38,14 @@ int main()
 		//	Listen for quit or restart commands
 		if (game->GetQuitGame())
 		{
-			gameFinished = true;
+			gameRunning = false;
 		}
 		else if (game->GetRestart())
 		{
 			InitializeGame();
 		}
 
-	} while (!gameFinished);
+	} while (gameRunning);
 
 	// De-allocate memory
 	delete game;

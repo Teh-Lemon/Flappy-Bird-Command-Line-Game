@@ -1,0 +1,8 @@
+0,FLAP,false
+0,F,false
+1,RESTART,false
+1,R,false
+2,QUIT,false
+2,Q,false
+3,UPDATE,false
+3,WAIT,false
