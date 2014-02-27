@@ -9,7 +9,7 @@ Player::Player(void)
 {
 	// Player defaults
 	positionY = 5;
-	playerShape = 'w';
+	playerShape = 'W';
 	velocityY = 0;
 	isAlive = true;
 }
