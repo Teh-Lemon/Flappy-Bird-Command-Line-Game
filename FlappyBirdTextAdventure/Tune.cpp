@@ -1,8 +1,12 @@
 #include "Tune.h"
 
 
-Tune::Tune(void)
+Tune::Tune(std::string filePath = "")
 {
+	if (filePath.size() > 0)
+	{
+		LoadFromFile(filePath);
+	}
 }
 
 

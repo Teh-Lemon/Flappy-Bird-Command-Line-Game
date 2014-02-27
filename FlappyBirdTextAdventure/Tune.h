@@ -11,7 +11,7 @@ class Tune
 private:
 	std::vector<Note*> notes;
 public:
-	Tune(void);
+	Tune(std::string);
 	~Tune(void);
 
 	// Load the tune from a file

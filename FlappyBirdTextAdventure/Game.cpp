@@ -9,10 +9,13 @@ const int INTERVAL_OBSTACLES = 8;
 const int START_PERIOD = 5;
 const std::string DATA_FILE_PATH = "Data/data.dat";
 const std::string VERBS_FILE_PATH = "Data/verbs.txt";
-const std::string START_MSG = " Available: FLAP/F, 1/RESTART/R, 2/QUIT/Q or nothing at all \n Have fun - Teh Lemon";
+const std::string START_MSG = " Available: FLAP/F, RESTART/R, QUIT/Q or nothing at all \n Have fun - Teh Lemon";
 
 // Game time
 int timeCounter = 0;
+// Used to format score/fps line
+int scoreLength;
+int fpsLength;
 
 #pragma region Initialization
 // Constructor
@@ -28,10 +31,8 @@ Game::Game(void)
 	validInput = START_MSG;
 	srand (time(NULL));
 
-	scorePlusTune = new Tune();
-	scorePlusTune->LoadFromFile("Data/Sounds/scorePlus.txt");
-	gameOverTune = new Tune();
-	gameOverTune->LoadFromFile("Data/Sounds/gameOver.txt");
+	scorePlusTune = new Tune("Data/Sounds/scorePlus.txt");
+	gameOverTune = new Tune("Data/Sounds/gameOver.txt");
 
 	LoadVerbFile(VERBS_FILE_PATH);
 	ReadSavedData(DATA_FILE_PATH);
@@ -41,7 +42,8 @@ Game::Game(void)
 Game::~Game(void)
 {
 	delete player;
-
+	delete scorePlusTune;
+	delete gameOverTune;
 	obstacleList.clear();
 }
 
@@ -219,14 +221,40 @@ bool Game::GetRestart()
 // Print the game title
 void Game::PrintGameName()
 {
-	std::cout << " FLAPPY BIRD TEXT GAME" << std::endl;
+	std::cout << "      FLAPPY BIRD TEXT GAME" << std::endl;
+	std::cout << " --------------------------------";
 }
 
 // Print the current score
 void Game::PrintScore()
 {
-	std::cout << " Score: " << score << std::endl;
+	// Print the score + update its length
+	std::string scoreStr = "  Score: " + std::to_string(static_cast<long long>(score));
+	scoreLength = scoreStr.size();
+
+	std::cout << scoreStr;
 }
+
+void Game::PrintFPSCounter(double dt)
+{
+	if (dt > 0)
+	{
+		// Find the frame rate per hour
+		double fps = 1 / dt;
+		std::string fpsStr = "FPS: " + std::to_string(static_cast<long long>(fps));;
+		fpsLength = fpsStr.size();
+
+		// Right align to the stage
+		for (int i = 0; i < fpsLength; i++)
+		{
+			std::cout << "\b";
+		}
+
+		std::cout << fpsStr;
+
+	}
+}
+
 
 // Print the borders
 void Game::PrintVerticalBorder()
@@ -297,20 +325,6 @@ char Game::PrintBackground(int x, int y)
 			return '\\';
 		}
 	}
-	
-	/*
-	// Draw bottom of mountain
-	if (y == STAGE_HEIGHT - 1)
-	{
-		if (x % 2 == 0)
-		{
-			return '/';
-		}
-		else
-		{
-			return '\\';
-		}
-	}*/
 	return NULL;
 }
 
@@ -370,18 +384,24 @@ void Game::PrintInputStatus()
 }
 
 // Draw the window
-void Game::Display()
+void Game::Display(float dt)
 {
 	std::cout << std::endl;
 
 	// Print the game title
 	PrintGameName();
-	std::cout << " --------------------------" << std::endl;
 	std::cout << std::endl;
 
 	// Print the player score
 	PrintScore();
-	//std::cout << std::endl;
+	// Print a space between score and fps
+	for (int i = 0; i < STAGE_WIDTH - scoreLength + 2; i++)
+	{
+		std::cout << " ";
+	}
+	// Print the fps counter
+	PrintFPSCounter(dt);
+	std::cout << std::endl;
 
 	// Print the game stage
 	PrintStage();
@@ -520,9 +540,9 @@ void Game::ApplyGameOver()
 	// Play game over sound
 	queuedTunes.push_back(gameOverTune);
 	// Display game over message
-	validInput = "GAME OVER. YOUR HIGH SCORE IS "
+	validInput = " GAME OVER. YOUR HIGH SCORE IS "
 		+ std::to_string(static_cast<long long>(highScore)) + "\n" 
-		+ "[RESTART, QUIT]";
+		+ " [RESTART, QUIT]";
 
 	// Change the state
 	state = GAME_OVER;
@@ -627,9 +647,9 @@ void Game::Update(std::string input)
 		break;
 
 	case GAME_OVER:
-		validInput = "GAME OVER. YOUR HIGH SCORE IS "
+		validInput = " GAME OVER. YOUR HIGH SCORE IS "
 			+ std::to_string(static_cast<long long>(highScore)) + "\n" 
-			+ "[RESTART, QUIT]";
+			+ " [RESTART, QUIT]";
 		break;
 
 	default:

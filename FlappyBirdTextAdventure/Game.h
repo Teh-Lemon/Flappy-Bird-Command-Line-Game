@@ -44,6 +44,8 @@ private:
 	void PrintGameName();
 	// Print the player score
 	void PrintScore();
+	// Print the fps counter
+	void PrintFPSCounter(double);
 	// Print the game area
 	void PrintStage();
 	// Print input status
@@ -98,7 +100,7 @@ public:
 	bool GetRestart();
 
 	// Draw the game window
-	void Display();
+	void Display(float);
 	// Interpret user entered commands
 	void ParseInput(std::string);
 	// Game loop

@@ -5,12 +5,15 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <ctime>
 
 #include "Game.h";
 
 void InitializeGame();
 Game* game;
-// States
+clock_t startTime;
+clock_t endTime;
+double dt;
 
 int main()
 {
@@ -24,11 +27,14 @@ int main()
 	// Game update loop
 	do
 	{
+		// Start timer for frame rate
+		startTime = clock();
+
 		// Clear the console window
 		system("cls");
 
 		// Display the game stage
-		game->Display();
+		game->Display(dt);
 
 		// Play any sounds		
 		game->PlaySounds();
@@ -47,6 +53,10 @@ int main()
 		{
 			InitializeGame();
 		}
+
+		// Time frame has been active for
+		endTime = clock();
+		dt = (double)(endTime - startTime) / CLOCKS_PER_SEC;
 
 	} while (gameRunning);
 
