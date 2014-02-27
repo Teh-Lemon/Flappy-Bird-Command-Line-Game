@@ -1,11 +1,9 @@
-Flappy Bird Text Adventure game
+Flappy Bird Text game
 =======================
 
 Command driven, non-real time version of Flappy Bird written in C++.
 
+Download here: https://dl.dropboxusercontent.com/u/15765996/FlappyBirdTextAdventure_260214_2.zip
+
 Still to be implemented:
-- File validation
-- - Full checks to verify high score data is an integer
-- - If saved data file is missing, create one
-- Sound
 - FPS counter for the hardcore players

@@ -9,6 +9,7 @@ const int INTERVAL_OBSTACLES = 8;
 const int START_PERIOD = 5;
 const std::string DATA_FILE_PATH = "Data/data.dat";
 const std::string VERBS_FILE_PATH = "Data/verbs.txt";
+const std::string START_MSG = " Available: FLAP/F, 1/RESTART/R, 2/QUIT/Q or nothing at all \n Have fun - Teh Lemon";
 
 // Game time
 int timeCounter = 0;
@@ -20,11 +21,17 @@ Game::Game(void)
 	score = 0;
 	highScore = 0;
 	player = new Player();
-	validInput = "";
 	gameOver = false;
 	quitGame = false;
 	restarting = false;
 	state = PLAYING;
+	validInput = START_MSG;
+	srand (time(NULL));
+
+	scorePlusTune = new Tune();
+	scorePlusTune->LoadFromFile("Data/Sounds/scorePlus.txt");
+	gameOverTune = new Tune();
+	gameOverTune->LoadFromFile("Data/Sounds/gameOver.txt");
 
 	LoadVerbFile(VERBS_FILE_PATH);
 	ReadSavedData(DATA_FILE_PATH);
@@ -34,6 +41,8 @@ Game::Game(void)
 Game::~Game(void)
 {
 	delete player;
+
+	obstacleList.clear();
 }
 
 void Game::ReadSavedData(std::string filePath)
@@ -210,18 +219,19 @@ bool Game::GetRestart()
 // Print the game title
 void Game::PrintGameName()
 {
-	std::cout << "FLAPPY BIRD TEXT ADVENTURE" << std::endl;
+	std::cout << " FLAPPY BIRD TEXT GAME" << std::endl;
 }
 
 // Print the current score
 void Game::PrintScore()
 {
-	std::cout << "Score: " << score << std::endl;
+	std::cout << " Score: " << score << std::endl;
 }
 
 // Print the borders
 void Game::PrintVerticalBorder()
 {
+	std::cout << " ";
 	for (int i = 0; i < STAGE_WIDTH + 2; i++)
 	{
 		std::cout << "=";
@@ -260,6 +270,50 @@ char Game::PrintObstacles(int w, int h)
 	return NULL;
 }
 
+// Draw mountains at the bottom
+char Game::PrintBackground(int x, int y)
+{	
+	// Draw peak of mountain
+	if (y == STAGE_HEIGHT - 2)
+	{
+		if (x % 4 == 1)
+		{
+			return '/';
+		}
+		else if (x % 4 == 2)
+		{
+			return '\\';
+		}
+	}
+	// Draw bottom of mountain
+	if (y == STAGE_HEIGHT - 1)
+	{
+		if (x % 4 == 0)
+		{
+			return '/';
+		}
+		else if (x % 4 == 3)
+		{
+			return '\\';
+		}
+	}
+	
+	/*
+	// Draw bottom of mountain
+	if (y == STAGE_HEIGHT - 1)
+	{
+		if (x % 2 == 0)
+		{
+			return '/';
+		}
+		else
+		{
+			return '\\';
+		}
+	}*/
+	return NULL;
+}
+
 // Print the game area
 void Game::PrintStage()
 {
@@ -269,6 +323,7 @@ void Game::PrintStage()
 	// Draw the game row by row
 	for (int h = 0; h < STAGE_HEIGHT; h++)
 	{
+		std::cout << " ";
 		// Print the left borders
 		PrintHorizontalBorder();
 
@@ -277,6 +332,12 @@ void Game::PrintStage()
 		{
 			char charToPrint = ' ';
 			
+			// Draw the background
+			if (PrintBackground(w, h) != NULL)
+			{
+				charToPrint = PrintBackground(w, h);
+			}
+
 			// Draw the obstacles
 			if (PrintObstacles(w, h) != NULL)
 			{
@@ -287,7 +348,7 @@ void Game::PrintStage()
 			if (PrintPlayer(w, h) != NULL)
 			{
 				charToPrint = PrintPlayer(w, h);
-			}
+			}			
 
 			std::cout << charToPrint;
 		}
@@ -300,6 +361,7 @@ void Game::PrintStage()
 	// Draw the bottom border
 	PrintVerticalBorder();
 }
+
 
 // Print the status of the entered command
 void Game::PrintInputStatus()
@@ -314,7 +376,7 @@ void Game::Display()
 
 	// Print the game title
 	PrintGameName();
-	std::cout << "---------------------------" << std::endl;
+	std::cout << " --------------------------" << std::endl;
 	std::cout << std::endl;
 
 	// Print the player score
@@ -328,7 +390,7 @@ void Game::Display()
 	PrintInputStatus();
 
 	// Print the command line
-	std::cout << "Command: ";
+	std::cout << " What will you do?: ";
 }
 #pragma endregion
 
@@ -383,7 +445,7 @@ void Game::GenerateObstacle()
 		// Randomize its height.
 		// At least a height of 1
 		// Below the top of the stage
-		int height = (rand() % (STAGE_HEIGHT - obstacleList[0]->GetGapSize())) + 1;
+		int height = (rand() % (STAGE_HEIGHT - obstacleList[0]->GetGapSize() - 1)) + 1;
 		obstacleList.back()->SetHeight(height);
 	}
 }
@@ -425,6 +487,7 @@ void Game::CheckCollisions()
 		if (PLAYER_X_POSITION == obstacleList[i]->GetPositionX() + 1)
 		{
 			score++;
+			queuedTunes.push_back(scorePlusTune);
 		}
 
 		// Remove obstacle when they go off the stage
@@ -437,18 +500,46 @@ void Game::CheckCollisions()
 		// Set game over if true
 		if (IntersectWithObstacle(obstacleList[i], PLAYER_X_POSITION, player->GetPositionY()))
 		{
-			player->SetPlayerShape('x');
-
-			if (score > highScore)
-			{
-				highScore = score;
-				SaveSavedData(DATA_FILE_PATH);
-			}
-
-			state = GAME_OVER;
+			ApplyGameOver();
 		}
 
 	}
+}
+
+void Game::ApplyGameOver()
+{
+	// Set the new high score if achieved
+	if (score > highScore)
+	{
+		highScore = score;
+		SaveSavedData(DATA_FILE_PATH);
+	}
+
+	// Change player shape
+	player->SetPlayerShape('x');		
+	// Play game over sound
+	queuedTunes.push_back(gameOverTune);
+	// Display game over message
+	validInput = "GAME OVER. YOUR HIGH SCORE IS "
+		+ std::to_string(static_cast<long long>(highScore)) + "\n" 
+		+ "[RESTART, QUIT]";
+
+	// Change the state
+	state = GAME_OVER;
+}
+#pragma endregion
+
+#pragma region sounds
+// Play all the sounds that were queued up
+void Game::PlaySounds()
+{
+	// Play each tune in the queue then empty it
+	for (int i = 0; i < queuedTunes.size(); i++)
+	{
+		queuedTunes[i]->Play();
+	}
+
+	queuedTunes.clear();
 }
 #pragma endregion
 
@@ -540,8 +631,9 @@ void Game::Update(std::string input)
 			+ std::to_string(static_cast<long long>(highScore)) + "\n" 
 			+ "[RESTART, QUIT]";
 		break;
-	}
-	
 
+	default:
+		break;
+	}
 }
 #pragma endregion

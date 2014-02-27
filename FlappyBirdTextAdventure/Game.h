@@ -6,10 +6,13 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <ctime>
 
 #include "Player.h"
 #include "Verb.h"
 #include "Obstacle.h"
+#include "Note.h"
+#include "Tune.h"
 
 class Game
 {
@@ -52,6 +55,8 @@ private:
 	char PrintPlayer(int, int);
 	// Print the obstacles
 	char PrintObstacles(int, int);
+	// Draw the background
+	char PrintBackground(int, int);
 
 	// Generate the obstacles
 	void GenerateObstacle();
@@ -63,6 +68,16 @@ private:
 	void CheckCollisions();
 	// Keep the player within the stage
 	void ApplyStageBoundaries();
+	// Set game over
+	void ApplyGameOver();
+
+	// Sound
+	// Sound for when the score increases
+	Tune* scorePlusTune;
+	// Sound for when it is game over
+	Tune* gameOverTune;
+	// List of tunes queued up to be played next frame
+	std::vector <Tune*> queuedTunes;
 
 	// Read in the available commands
 	void LoadVerbFile(std::string filePath);
@@ -88,6 +103,8 @@ public:
 	void ParseInput(std::string);
 	// Game loop
 	void Update(std::string);
+	// Play sounds	
+	void PlaySounds();
 };
 
 #endif

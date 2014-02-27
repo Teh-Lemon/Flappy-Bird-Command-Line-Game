@@ -30,6 +30,9 @@ int main()
 		// Display the game stage
 		game->Display();
 
+		// Play any sounds		
+		game->PlaySounds();
+
 		// Take in user input
 		std::getline(std::cin, userInput);
 		game->Update(userInput);
