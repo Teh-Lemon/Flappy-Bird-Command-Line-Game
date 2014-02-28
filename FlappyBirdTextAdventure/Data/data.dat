@@ -1,1 +1,5 @@
-highscore=19
+highscore=0
+sounds=1
+background=1
+playermodel=W
+startMsg=Data/Text/StartMsg.txt

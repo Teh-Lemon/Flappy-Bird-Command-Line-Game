@@ -76,6 +76,13 @@
     <ClCompile Include="Tune.cpp" />
     <ClCompile Include="Verb.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\data.dat" />
+    <None Include="Data\Sounds\gameOver.txt" />
+    <None Include="Data\Sounds\scorePlus.txt" />
+    <None Include="Data\Text\StartMsg.txt" />
+    <None Include="Data\verbs.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

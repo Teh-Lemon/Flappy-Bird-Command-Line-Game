@@ -9,3 +9,6 @@
 2,2,false
 3,UPDATE,false
 3,WAIT,false
+4,SOUND,false
+5,BACKGROUND,false
+5,BG,false

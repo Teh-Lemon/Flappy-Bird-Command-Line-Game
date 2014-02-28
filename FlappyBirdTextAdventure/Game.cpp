@@ -9,7 +9,7 @@ const int INTERVAL_OBSTACLES = 8;
 const int START_PERIOD = 5;
 const std::string DATA_FILE_PATH = "Data/data.dat";
 const std::string VERBS_FILE_PATH = "Data/verbs.txt";
-const std::string START_MSG = " Available: FLAP/F, RESTART/R, QUIT/Q or nothing at all \n Have fun - Teh Lemon";
+std::string START_MSG = "";
 
 // Game time
 int timeCounter = 0;
@@ -27,9 +27,11 @@ Game::Game(void)
 	gameOver = false;
 	quitGame = false;
 	restarting = false;
-	state = PLAYING;
-	validInput = START_MSG;
+	state = NEW_GAME;
+	validInput = "";
 	srand (time(NULL));
+	soundsOn = true;
+	bgOn = true;
 
 	scorePlusTune = new Tune("Data/Sounds/scorePlus.txt");
 	gameOverTune = new Tune("Data/Sounds/gameOver.txt");
@@ -106,6 +108,25 @@ void Game::LoadSavedData(std::string field, std::string value)
 	{
 		highScore = atoi(value.c_str());
 	}
+	else if (field == "sounds")
+	{
+		soundsOn = atoi(value.c_str());
+	}
+	else if (field == "background")
+	{
+		bgOn = atoi(value.c_str());
+	}
+	else if (field == "playermodel")
+	{
+		player->SetPlayerShape(value[0]);
+	}
+	else if (field == "startMsg")
+	{
+		std::ifstream txtFile(value);
+		std::stringstream message;
+		message << txtFile.rdbuf();
+		START_MSG = message.str();
+	}
 }
 
 void Game::SaveSavedData(std::string filePath)
@@ -118,7 +139,11 @@ void Game::SaveSavedData(std::string filePath)
 	if (txtFile.is_open())
 	{
 		txtFile.clear();
-		txtFile << "highscore=" << highScore;
+		txtFile << "highscore=" << highScore << std::endl;
+		txtFile << "sounds=" << soundsOn << std::endl;
+		txtFile << "background=" << bgOn << std::endl;
+		txtFile << "playermodel=" << player->GetPlayerShape() << std::endl;
+		txtFile << "startMsg=Data/Text/StartMsg.txt";
 
 		txtFile.close();
 	}
@@ -334,42 +359,56 @@ void Game::PrintStage()
 	// Draw the top border
 	PrintVerticalBorder();
 
-	// Draw the game row by row
-	for (int h = 0; h < STAGE_HEIGHT; h++)
+	switch (state)
 	{
-		std::cout << " ";
-		// Print the left borders
-		PrintHorizontalBorder();
+	case NEW_GAME:
+		std::cout << START_MSG << std::endl;
+		break;
 
-		// Draw cell by cell
-		for (int w = 0; w < STAGE_WIDTH; w++)
+	default:
+		// Draw the game row by row
+		for (int h = 0; h < STAGE_HEIGHT; h++)
 		{
-			char charToPrint = ' ';
+			std::cout << " ";
+
+			// Print the left borders
+			PrintHorizontalBorder();
+
+			// Draw cell by cell
+			for (int w = 0; w < STAGE_WIDTH; w++)
+			{
+				char charToPrint = ' ';
 			
-			// Draw the background
-			if (PrintBackground(w, h) != NULL)
-			{
-				charToPrint = PrintBackground(w, h);
+				// Draw the background
+				if (bgOn)
+				{
+					if (PrintBackground(w, h) != NULL)
+					{
+						charToPrint = PrintBackground(w, h);
+					}
+				}
+
+				// Draw the obstacles
+				if (PrintObstacles(w, h) != NULL)
+				{
+					charToPrint = PrintObstacles(w, h);
+				}
+
+				// Draw the player
+				if (PrintPlayer(w, h) != NULL)
+				{
+					charToPrint = PrintPlayer(w, h);
+				}			
+
+				std::cout << charToPrint;
 			}
 
-			// Draw the obstacles
-			if (PrintObstacles(w, h) != NULL)
-			{
-				charToPrint = PrintObstacles(w, h);
-			}
+			// Print the right border
+			PrintHorizontalBorder();
 
-			// Draw the player
-			if (PrintPlayer(w, h) != NULL)
-			{
-				charToPrint = PrintPlayer(w, h);
-			}			
-
-			std::cout << charToPrint;
+			std::cout << std::endl;
 		}
-
-		// Print the right border
-		PrintHorizontalBorder();
-		std::cout << std::endl;
+		break;	
 	}
 
 	// Draw the bottom border
@@ -407,10 +446,21 @@ void Game::Display(float dt)
 	PrintStage();
 
 	// Print the previous input status
+	std::cout << " ";
 	PrintInputStatus();
 
 	// Print the command line
-	std::cout << " What will you do?: ";
+	switch (state)
+	{
+	case NEW_GAME:
+		std::cout << " Press enter to begin...";
+		break;
+	default:
+		std::cout << " What will you do?: ";
+		break;
+	}
+
+	validInput = "";
 }
 #pragma endregion
 
@@ -434,6 +484,40 @@ void Game::VerbRoutine(int ID)
 	if (ID == 2)
 	{
 		quitGame = true;
+	}
+
+	// Toggle sounds
+	if (ID == 4)
+	{
+		soundsOn = !soundsOn;
+
+		if (soundsOn)
+		{
+			validInput = "Sounds on";
+		}
+		else
+		{
+			validInput = "Sounds off";
+		}
+
+		SaveSavedData(DATA_FILE_PATH);
+	}
+
+	// Toggle background
+	if (ID == 5)
+	{
+		bgOn = !bgOn;
+
+		if (bgOn)
+		{
+			validInput = "Background on";
+		}
+		else
+		{
+			validInput = "Background off";
+		}
+
+		SaveSavedData(DATA_FILE_PATH);
 	}
 }
 
@@ -540,7 +624,7 @@ void Game::ApplyGameOver()
 	// Play game over sound
 	queuedTunes.push_back(gameOverTune);
 	// Display game over message
-	validInput = " GAME OVER. YOUR HIGH SCORE IS "
+	validInput = "GAME OVER. YOUR HIGH SCORE IS "
 		+ std::to_string(static_cast<long long>(highScore)) + "\n" 
 		+ " [RESTART, QUIT]";
 
@@ -553,10 +637,13 @@ void Game::ApplyGameOver()
 // Play all the sounds that were queued up
 void Game::PlaySounds()
 {
-	// Play each tune in the queue then empty it
-	for (int i = 0; i < queuedTunes.size(); i++)
+	if (soundsOn)
 	{
-		queuedTunes[i]->Play();
+		// Play each tune in the queue then empty it
+		for (int i = 0; i < queuedTunes.size(); i++)
+		{
+			queuedTunes[i]->Play();
+		}
 	}
 
 	queuedTunes.clear();
@@ -593,8 +680,7 @@ void Game::ParseInput(std::string input)
 
 	//	Check if valid
 	if (vbID >= 0)
-	{
-		validInput = "";
+	{		
 		VerbRoutine(vbID);
 	}
 	else
@@ -602,10 +688,6 @@ void Game::ParseInput(std::string input)
 		if (input.size() > 0)
 		{
 			validInput = "INVALID COMMAND";
-		}
-		else
-		{
-			validInput = "";
 		}
 	}
 }
@@ -617,6 +699,9 @@ void Game::Update(std::string input)
 
 	switch (state)
 	{
+	case NEW_GAME:
+		state = PLAYING;
+		break;
 	case PLAYING:
 		if (timeCounter > START_PERIOD)
 		{
@@ -647,7 +732,7 @@ void Game::Update(std::string input)
 		break;
 
 	case GAME_OVER:
-		validInput = " GAME OVER. YOUR HIGH SCORE IS "
+		validInput = "GAME OVER. YOUR HIGH SCORE IS "
 			+ std::to_string(static_cast<long long>(highScore)) + "\n" 
 			+ " [RESTART, QUIT]";
 		break;

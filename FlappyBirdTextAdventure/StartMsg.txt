@@ -1,0 +1,9 @@
+Available commands:
+FLAP, F (Flap that bird)
+RESTART, R (Restart the game)
+QUIT, Q (Closes the game)
+SOUND (Toggles the sound on/off)
+BACKGROUND, BG (Toggles the background on/off)
+
+Have fun!
+- Teh Lemon

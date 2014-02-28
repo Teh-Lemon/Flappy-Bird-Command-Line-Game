@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\Sounds">
+      <UniqueIdentifier>{b78f93b9-8ca7-42c6-97c3-8ced7e840a7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Text">
+      <UniqueIdentifier>{29d25dad-2112-4eec-b06d-e9b8f2969597}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -56,5 +62,22 @@
     <ClCompile Include="Tune.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\data.dat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\verbs.txt">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Sounds\gameOver.txt">
+      <Filter>Resource Files\Sounds</Filter>
+    </None>
+    <None Include="Data\Sounds\scorePlus.txt">
+      <Filter>Resource Files\Sounds</Filter>
+    </None>
+    <None Include="Data\Text\StartMsg.txt">
+      <Filter>Resource Files\Text</Filter>
+    </None>
   </ItemGroup>
 </Project>

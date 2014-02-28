@@ -36,8 +36,11 @@ private:
 	// Whether to restart the game
 	bool restarting;
 	// States
-	enum { PLAYING, GAME_OVER };
+	enum { NEW_GAME, PLAYING, GAME_OVER };
 	int state;
+	// Options
+	bool soundsOn;
+	bool bgOn;
 
 	// Draw methods
 	// Print the game title at the top of the window
