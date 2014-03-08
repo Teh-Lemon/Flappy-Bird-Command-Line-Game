@@ -4,6 +4,7 @@
  QUIT, Q (Closes the game)
  SOUND (Toggles the sound on/off)
  BACKGROUND, BG (Toggles the background on/off)
+ COLOURS, COLORS (Toggle the colour on/off)
 
  Have fun!
  - Teh Lemon

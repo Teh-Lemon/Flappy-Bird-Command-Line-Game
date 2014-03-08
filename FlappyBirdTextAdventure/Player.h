@@ -1,6 +1,8 @@
 #ifndef PLAYER
 #define PLAYER
 
+#include "ConsoleUtils.h"
+
 class Player
 {
 
@@ -13,6 +15,8 @@ private:
 	bool isAlive;
 	// Player model
 	char playerShape;
+	// Text Color
+	WORD TextColor;
 
 
 	void ApplyGravity();
@@ -32,12 +36,14 @@ public:
 	int GetPositionY();
 	bool GetIsAlive();
 	char GetPlayerShape();
+	WORD GetTextColor();
 
 	// Setters
 	void SetPositionY(int);
 	void SetIsAlive(bool);
 	void SetPlayerShape(char);
 	void SetVelocityY(int);
+	void SetTextColor(WORD);
 };
 
 #endif

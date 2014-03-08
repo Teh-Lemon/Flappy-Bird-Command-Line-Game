@@ -13,10 +13,12 @@
 #include "Obstacle.h"
 #include "Note.h"
 #include "Tune.h"
+#include "ConsoleUtils.h"
 
 class Game
 {
 private:
+	// Drawing
 	// Player score for that game session
 	int score;
 	// Player's highest recorded score
@@ -41,6 +43,7 @@ private:
 	// Options
 	bool soundsOn;
 	bool bgOn;
+	bool colorsOn;
 
 	// Draw methods
 	// Print the game title at the top of the window
@@ -62,6 +65,8 @@ private:
 	char PrintObstacles(int, int);
 	// Draw the background
 	char PrintBackground(int, int);
+	// Text colours
+	void SetDefaultTextColor();
 
 	// Generate the obstacles
 	void GenerateObstacle();

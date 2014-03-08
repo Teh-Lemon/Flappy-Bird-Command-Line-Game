@@ -9,8 +9,9 @@ Player::Player(void)
 {
 	// Player defaults
 	positionY = 5;
-	playerShape = 'W';
+	playerShape = '>';
 	velocityY = 0;
+	TextColor = FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
 	isAlive = true;
 }
 
@@ -55,6 +56,17 @@ void Player::SetPlayerShape(char newShape)
 void Player::SetVelocityY(int newVel)
 {
 	velocityY = newVel;
+}
+
+// TextColor getter/setter
+WORD Player::GetTextColor()
+{
+	return TextColor;
+}
+
+void Player::SetTextColor(WORD newColor)
+{
+	TextColor = newColor;
 }
 
 void Player::ApplyGravity()

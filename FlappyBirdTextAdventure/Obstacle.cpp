@@ -8,6 +8,7 @@ Obstacle::Obstacle(int setHeight, int spawnPos)
 	width = 1;
 	shape = '|';
 	velocityX = -1;
+	TextColor = FOREGROUND_GREEN|FOREGROUND_INTENSITY;
 }
 
 
@@ -41,6 +42,17 @@ char Obstacle::GetShape()
 int Obstacle::GetGapSize()
 {
 	return GAP_SIZE;
+}
+
+// TextColor getter/setter
+WORD Obstacle::GetTextColor()
+{
+	return TextColor;
+}
+
+void Obstacle::SetTextColor(WORD newColor)
+{
+	TextColor = newColor;
 }
 
 void Obstacle::Update()

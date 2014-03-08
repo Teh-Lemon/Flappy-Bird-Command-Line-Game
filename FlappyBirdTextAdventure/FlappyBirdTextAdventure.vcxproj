@@ -60,6 +60,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleUtils.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Note.h" />
     <ClInclude Include="Obstacle.h" />

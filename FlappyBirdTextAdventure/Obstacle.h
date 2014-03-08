@@ -1,6 +1,8 @@
 #ifndef OBSTACLE
 #define OBSTACLE
 
+#include "ConsoleUtils.h"
+
 class Obstacle
 {
 private:
@@ -8,7 +10,9 @@ private:
 	int width;
 	int positionX;
 	int velocityX;
-	char shape;
+	char shape;	
+	// Text Color
+	WORD TextColor;
 
 public:
 	Obstacle(int, int);
@@ -21,10 +25,12 @@ public:
 	int GetWidth();
 	int GetPositionX();
 	char GetShape();
-	int GetGapSize();
+	int GetGapSize();	
+	WORD GetTextColor();
 
 	// Setters
-	void SetHeight(int);
+	void SetHeight(int);	
+	void SetTextColor(WORD);
 };
 
 #endif

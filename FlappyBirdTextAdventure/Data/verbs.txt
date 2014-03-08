@@ -12,3 +12,7 @@
 4,SOUND,false
 5,BACKGROUND,false
 5,BG,false
+6,COLOURS,false
+6,COLORS,false
+6,COLOUR,false
+6,COLOR,false

@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Player.h"
 
 // Constants
 const int STAGE_WIDTH = 30;
@@ -32,6 +31,7 @@ Game::Game(void)
 	srand (time(NULL));
 	soundsOn = true;
 	bgOn = true;
+	colorsOn = true;
 
 	scorePlusTune = new Tune("Data/Sounds/scorePlus.txt");
 	gameOverTune = new Tune("Data/Sounds/gameOver.txt");
@@ -116,6 +116,10 @@ void Game::LoadSavedData(std::string field, std::string value)
 	{
 		bgOn = atoi(value.c_str());
 	}
+	else if (field == "colors")
+	{
+		colorsOn = atoi(value.c_str());
+	}
 	else if (field == "playermodel")
 	{
 		player->SetPlayerShape(value[0]);
@@ -142,6 +146,7 @@ void Game::SaveSavedData(std::string filePath)
 		txtFile << "highscore=" << highScore << std::endl;
 		txtFile << "sounds=" << soundsOn << std::endl;
 		txtFile << "background=" << bgOn << std::endl;
+		txtFile << "colors=" << colorsOn << std::endl;
 		txtFile << "playermodel=" << player->GetPlayerShape() << std::endl;
 		txtFile << "startMsg=Data/Text/StartMsg.txt";
 
@@ -245,25 +250,37 @@ bool Game::GetRestart()
 #pragma region Drawing
 // Print the game title
 void Game::PrintGameName()
-{
+{	
+	// White
+	SetDefaultTextColor();
 	std::cout << "      FLAPPY BIRD TEXT GAME" << std::endl;
-	std::cout << " --------------------------------";
+	// Grey
+	SetTextColor(FOREGROUND_RED| FOREGROUND_GREEN| FOREGROUND_BLUE, colorsOn);
+	std::cout << " --------------------------------";	
+	// White
+	SetDefaultTextColor();
 }
 
 // Print the current score
 void Game::PrintScore()
-{
+{	
+	// Yellow
+	SetTextColor(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_INTENSITY, colorsOn);
 	// Print the score + update its length
 	std::string scoreStr = "  Score: " + std::to_string(static_cast<long long>(score));
 	scoreLength = scoreStr.size();
 
-	std::cout << scoreStr;
+	std::cout << scoreStr;	
+	// White
+	SetDefaultTextColor();
 }
 
 void Game::PrintFPSCounter(double dt)
 {
 	if (dt > 0)
-	{
+	{		
+		// White
+		SetDefaultTextColor();
 		// Find the frame rate per hour
 		double fps = 1 / dt;
 		std::string fpsStr = "FPS: " + std::to_string(static_cast<long long>(fps));;
@@ -301,6 +318,7 @@ char Game::PrintPlayer(int w, int h)
 {
 	if (w == PLAYER_X_POSITION && h == player->GetPositionY())
 	{
+		SetTextColor(player->GetTextColor(), colorsOn);
 		return player->GetPlayerShape();
 	}
 	else
@@ -316,6 +334,7 @@ char Game::PrintObstacles(int w, int h)
 	{
 		if (IntersectWithObstacle(obstacleList[i], w, h))
 		{
+			SetTextColor(obstacleList[i]->GetTextColor(), colorsOn);
 			return obstacleList[i]->GetShape();
 		}
 	}
@@ -325,7 +344,10 @@ char Game::PrintObstacles(int w, int h)
 
 // Draw mountains at the bottom
 char Game::PrintBackground(int x, int y)
-{	
+{
+	// Grey
+	SetTextColor(FOREGROUND_RED| FOREGROUND_GREEN| FOREGROUND_BLUE, colorsOn);
+
 	// Draw peak of mountain
 	if (y == STAGE_HEIGHT - 2)
 	{
@@ -350,12 +372,16 @@ char Game::PrintBackground(int x, int y)
 			return '\\';
 		}
 	}
+
+	SetDefaultTextColor();
 	return NULL;
 }
 
 // Print the game area
 void Game::PrintStage()
 {
+	SetDefaultTextColor();
+
 	// Draw the top border
 	PrintVerticalBorder();
 
@@ -388,19 +414,20 @@ void Game::PrintStage()
 					}
 				}
 
-				// Draw the obstacles
+				// Draw the obstacles				
 				if (PrintObstacles(w, h) != NULL)
 				{
 					charToPrint = PrintObstacles(w, h);
 				}
 
-				// Draw the player
+				// Draw the player				
 				if (PrintPlayer(w, h) != NULL)
 				{
 					charToPrint = PrintPlayer(w, h);
 				}			
 
 				std::cout << charToPrint;
+				SetDefaultTextColor();
 			}
 
 			// Print the right border
@@ -431,19 +458,22 @@ void Game::Display(float dt)
 	PrintGameName();
 	std::cout << std::endl;
 
-	// Print the player score
+	// Print the player score	
 	PrintScore();
 	// Print a space between score and fps
 	for (int i = 0; i < STAGE_WIDTH - scoreLength + 2; i++)
 	{
 		std::cout << " ";
-	}
+	}	
+	SetDefaultTextColor();
+
 	// Print the fps counter
 	PrintFPSCounter(dt);
 	std::cout << std::endl;
 
 	// Print the game stage
-	PrintStage();
+	PrintStage();	
+	SetDefaultTextColor();
 
 	// Print the previous input status
 	std::cout << " ";
@@ -453,6 +483,7 @@ void Game::Display(float dt)
 	switch (state)
 	{
 	case NEW_GAME:
+		SetDefaultTextColor();
 		std::cout << " Press enter to begin...";
 		break;
 	default:
@@ -461,6 +492,11 @@ void Game::Display(float dt)
 	}
 
 	validInput = "";
+}
+
+void Game::SetDefaultTextColor()
+{
+	SetTextColor(FOREGROUND_RED| FOREGROUND_GREEN| FOREGROUND_BLUE|FOREGROUND_INTENSITY, colorsOn);
 }
 #pragma endregion
 
@@ -517,6 +553,14 @@ void Game::VerbRoutine(int ID)
 			validInput = "Background off";
 		}
 
+		SaveSavedData(DATA_FILE_PATH);
+	}
+
+	// Toggle colours
+	if (ID == 6)
+	{
+		colorsOn = !colorsOn;
+		
 		SaveSavedData(DATA_FILE_PATH);
 	}
 }
@@ -620,7 +664,8 @@ void Game::ApplyGameOver()
 	}
 
 	// Change player shape
-	player->SetPlayerShape('x');		
+	player->SetPlayerShape('x');	
+	player->SetTextColor(FOREGROUND_RED|FOREGROUND_INTENSITY);
 	// Play game over sound
 	queuedTunes.push_back(gameOverTune);
 	// Display game over message
