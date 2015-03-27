@@ -1,4 +1,4 @@
-Flappy Bird Text game
+Flappy Bird Command Line Game
 =======================
 
 Command driven, non-real time version of Flappy Bird written in C++ inspired by the Flappy Jam.
