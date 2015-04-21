@@ -1,7 +1,7 @@
-Flappy Bird Command Line Game
+Flappy Bird CMD Game
 =======================
 
-Command driven, non-real time version of Flappy Bird written in C++ inspired by the Flappy Jam.
+Command driven, turn-based version of Flappy Bird written in C++ inspired by the Flappy Jam.
 
 Download here: https://db.tt/sfpr0nQu
 
