@@ -253,7 +253,7 @@ void Game::PrintGameName()
 {	
 	// White
 	SetDefaultTextColor();
-	std::cout << "      FLAPPY BIRD TEXT GAME" << std::endl;
+	std::cout << "         FLAPPY BIRD CMD" << std::endl;
 	// Grey
 	SetTextColor(FOREGROUND_RED| FOREGROUND_GREEN| FOREGROUND_BLUE, colorsOn);
 	std::cout << " --------------------------------";	
