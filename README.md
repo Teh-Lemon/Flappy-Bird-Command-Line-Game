@@ -7,7 +7,7 @@ Download here: https://github.com/Teh-Lemon/Flappy-Bird-Command-Line-Game/releas
 
 Note: Has only been tested on Windows 7 64-bit and will require a Windows platform.
 
-![Screenshot](Screenshots/Release3.png)
+![Screenshot](Screenshots/Release4.png)
 
 Features:
 - Flapping!
